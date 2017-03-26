@@ -15,7 +15,6 @@ sub profit{
 }
 
 sub getodds{
-	#my $url = 'https://www.oddschecker.com/football/english/premier-league/hull-v-west-ham/winner';
 	my $url = $_[0];
 	my $html = qx{curl --insecure --silent $url};
 	my @html = split /\n/,$html;
@@ -40,7 +39,8 @@ sub getgames{
 			s#href\=\"([^\s]+/winner)\"##;
 			$tmp = $1;
 			if(!($tmp=~/^https/)){
-				$tmp = "https://www.oddschecker.com/$tmp";
+				$tmp = "/" . $tmp if(!($tmp =~ m#^/#));
+				$tmp = "https://www.oddschecker.com$tmp";
 			}
 			else {next;}
 
@@ -56,14 +56,9 @@ print "\n";
 
 foreach(&getgames($input)){
 	my $profit = &profit(&getodds($_));
-
-	#print("$_ \n$profit%\n";
 	if($profit > 0){
 		printf("\n%s \n%.3f%%",$_,$profit);
 	}
 	else{print ".";}
 
 }
-
-
-
