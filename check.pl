@@ -1,6 +1,9 @@
 #!/usr/bin/perl
 print "Content-Type: text/html\n\n";
 
+# This program will search for arbitrage opertunities from oddschecker
+# from a list of matches such as: https://www.oddschecker.com/football
+
 use strict;
 use warnings;
 
@@ -21,11 +24,12 @@ sub getodds{
 	my @odds;
 	foreach(@html){
 		while(/data-best-dig/){
-			s/data-best-dig\=\"(.{1,5})\"/$1/;
+			s/data-best-dig\=\"(.{1,7})\"/$1/;
 			push(@odds,$1);
 		}
 	}
-	return @odds;
+	if(length($odds[0])){return @odds;}
+	else { return 1;}
 }
 
 sub getgames{
@@ -62,3 +66,5 @@ foreach(&getgames($input)){
 	else{print ".";}
 
 }
+
+print "\n";
