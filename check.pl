@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 print "Content-Type: text/html\n\n";
 
-# This program will search for arbitrage opertunities from oddschecker
+# This program will search for arbitrage opportunities from oddschecker
 # from a list of matches such as: https://www.oddschecker.com/football
 
 use strict;
