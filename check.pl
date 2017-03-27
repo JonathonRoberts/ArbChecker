@@ -3,11 +3,13 @@ print "Content-Type: text/html\n\n";
 
 # This program will search for arbitrage opportunities from oddschecker
 # from a list of matches such as: https://www.oddschecker.com/football
+#
+# TODO:
+# get list of markets to work out all arbs for a game, use the list from:
+# https://www.oddschecker.com/american-football/nfl/super-bowl-lii/betting-markets
 
 use strict;
 use warnings;
-
-package check;
 
 sub profit{
 	my $percentageprofit = 0;
@@ -24,7 +26,7 @@ sub getodds{
 	my @odds;
 	foreach(@html){
 		while(/data-best-dig/){
-			s/data-best-dig\=\"(.{1,7})\"/$1/;
+			s/data-best-dig\=\"(\d+\.?\d*)\"/$1/;
 			push(@odds,$1);
 		}
 	}
