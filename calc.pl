@@ -8,7 +8,7 @@ use Switch;
 sub calculate{
 	#@odds = @_;
 	my @odds = (2,3);
-	my $totalreturn = &setreturn(@odds);
+	my $returnodds = &setreturn(@odds);
 	my $totalstake = 100;
 
 	system("clear;");
@@ -18,7 +18,7 @@ sub calculate{
 	while(<>){
 		chomp;
 		switch ($_){
-			case "c" {@odds = &changeodds;$totalreturn = &setreturn(@odds);}
+			case "c" {@odds = &changeodds;$returnodds = &setreturn(@odds);}
 			case "q" {return;}
 			case /^\d+\.?\d*$/ {system("clear;");$totalstake = $_;}
 			else {system("clear;");print "Invalid input!\n";last;}
@@ -27,7 +27,7 @@ sub calculate{
 		#Output
 		&help;
 		printf("Total stake: %.2f\n",$totalstake);
-		my $returncash = $totalstake * $totalreturn;
+		my $returncash = $totalstake * $returnodds;
 		printf("Total return: %.2f\n",$returncash);
 		print "Odds\tStake\n";
 		foreach(@odds){
@@ -57,11 +57,16 @@ sub changeodds{
 }
 
 sub setreturn{
-	my $totalreturn;
+	#This has to be repeated otherwise the loop only recognises the first element in @_
+	my $returnodds = 0;
 	foreach(@_){
-		$totalreturn += 1/$_;
+		$returnodds += (1/$_);
 	}
-	$totalreturn =1/$totalreturn;
+	$returnodds = 0;
+	foreach(@_){
+		$returnodds += (1/$_);
+	}
+	return 1/$returnodds;
 
 }
 sub help{
