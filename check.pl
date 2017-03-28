@@ -56,17 +56,43 @@ sub getgames{
 	return @urls;
 }
 
-print "Enter url of matches page: ";
-chomp(my $input = <STDIN>);
-print "\n";
-
-foreach(&getgames($input)){
-	my $profit = &profit(&getodds($_));
-	if($profit > 0){
-		printf("\n%s \n%.3f%%",$_,$profit);
+sub crawlsite{
+	my $url = "https://www.oddschecker.com/sitemap.xml";
+	my $html = qx{curl --insecure --silent $url};
+	my @pages;
+	while($html =~ s#(https://www\.oddschecker\.com/[^\<]+)/sitemap\.xml##){
+		push(@pages,$1)
 	}
-	else{print ".";}
-
+	return @pages;
 }
 
-print "\n";
+print("Input events filter(e.g. football): ");
+chomp(my $input = <STDIN>);
+foreach my $workingpage(&crawlsite){
+	#Filter
+	if($workingpage =~ m#$input#){
+
+		foreach(&getgames($workingpage)){
+			my $profit = &profit(&getodds($_));
+			if($profit > 0){
+				printf("\n%s \n%.3f%%",$_,$profit);
+			}
+			else{print ".";}
+		}
+	}
+}
+
+#print "Enter url of matches page: ";
+#chomp(my $input = <STDIN>);
+#print "\n";
+#
+#foreach(&getgames($input)){
+#	my $profit = &profit(&getodds($_));
+#	if($profit > 0){
+#		printf("\n%s \n%.3f%%",$_,$profit);
+#	}
+#	else{print ".";}
+#
+#}
+#
+#print "\n";
