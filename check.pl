@@ -65,6 +65,25 @@ sub crawlsite{
 	}
 	return @pages;
 }
+sub uniq {
+	    my %seen;
+	        grep !$seen{$_}++, @_;
+	}
+
+sub list{
+	my @oldlist;
+	foreach(&crawlsite){
+		$_ =~ s#^.+\.com/([^\/]+).*#$1#;
+		push(@oldlist,$_);
+	}
+	my @newlist = &uniq(@oldlist);
+	foreach(@newlist){
+		print "$_\n";
+	}
+	return @newlist;
+}
+#&list;
+
 
 print("Input events filter(e.g. football): ");
 chomp(my $input = <STDIN>);
@@ -74,13 +93,14 @@ foreach my $workingpage(&crawlsite){
 
 		foreach(&getgames($workingpage)){
 			my $profit = &profit(&getodds($_));
-			if($profit > 0){
+			if($profit > 0.5){
 				printf("\n%s \n%.3f%%",$_,$profit);
 			}
 			else{print ".";}
 		}
 	}
 }
+print "\n";
 
 #print "Enter url of matches page: ";
 #chomp(my $input = <STDIN>);
