@@ -90,13 +90,12 @@ sub getallmarkets{
 	my $markets = qx{curl --insecure --silent $url};
 	my $filterurl;
 	my @markets;
-	print "$url\n";
 	if($url =~ m#^https\://www\.oddschecker\.com(.+)/betting-markets/#){
 		$filterurl = $1;
 	}
 	else{die "invalid url $_[0]\n"};
 	while($markets =~ s/\"$filterurl([^\"]+)//){
-		push(@markets,$_[0] . $1);
+			push(@markets,$_[0] . $1);
 	}
 	return @markets;
 }
@@ -114,8 +113,8 @@ sub findall{
 						my $profit = &profit(&getodds($workingpage));
 						if(0 < $profit && $profit < 15){
 							printf("\n%s \n%.3f%%",$workingpage,$profit);
-					}
-					else{print ".";}
+						}
+						else{print ".";}
 				}
 			}
 		}
