@@ -4,7 +4,7 @@
 A calculator for determining how much to bet on each market when Dutching
 
 **check.pl**
-Scrapes oddschecker in search of arbitrage opertunities
+Scrapes oddschecker in search of arbitrage opportunities
 
 **rule4.pl**
 A calculator which shows the resultant odds when a single outcome is removed from an event and Rule4(c) is enacted
