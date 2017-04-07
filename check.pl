@@ -111,7 +111,7 @@ sub findall{
 				foreach my $markets (&getgames($page)){
 					foreach my $workingpage (&getallmarkets($markets)){
 						my $profit = &profit(&getodds($workingpage));
-						if(0 < $profit && $profit < 15){
+						if(-0.1 < $profit && $profit < 15){
 							printf("\n%s \n%.3f%%",$workingpage,$profit);
 						}
 						else{print ".";}
@@ -133,7 +133,7 @@ sub findwinners{
 
 			foreach(&getgames($workingpage)){
 				my $profit = &profit(&getodds($_));
-				if(0 < $profit && $profit < 15){
+				if(-0.1 < $profit && $profit < 15){
 					printf("\n%s \n%.3f%%",$_,$profit);
 				}
 				else{print ".";}
@@ -150,7 +150,7 @@ sub findallfrompage{
 	chomp(my $input = <STDIN>);
 	foreach(&getallmarkets(&getgames($input))){
 		my $profit = &profit(&getodds($_));
-		if(0 < $profit && $profit < 15){
+		if(-0.1 < $profit && $profit < 15){
 			printf("\n%s \n%.3f%%",$_,$profit);
 		}
 		else{print ".";}
@@ -165,7 +165,7 @@ sub findwinnersfrompage{
 	chomp(my $input = <STDIN>);
 	foreach(&getgames($input)){
 		my $profit = &profit(&getodds($_));
-		if(0 < $profit && $profit < 15){
+		if(-0.1 < $profit && $profit < 15){
 			printf("\n%s \n%.3f%%",$_,$profit);
 		}
 		else{print ".";}
