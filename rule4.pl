@@ -29,13 +29,13 @@ foreach my $dropout (@odds){
 	elsif ($dropout<=1.95)	{$deduction = 1-.50;}
 	elsif ($dropout<=2.00)	{$deduction = 1-.45;}
 	elsif ($dropout<=2.25)	{$deduction = 1-.40;}
-	elsif ($dropout<=2.60)	{$deduction = 1-.35;}
-	elsif ($dropout<=2.80)	{$deduction = 1-.30;}
-	elsif ($dropout<=3.40)	{$deduction = 1-.25;}
-	elsif ($dropout<=4.20)	{$deduction = 1-.20;}
-	elsif ($dropout<=5.50)	{$deduction = 1-.15;}
-	elsif ($dropout<=7.00)	{$deduction = 1-.10;}
-	elsif ($dropout<=11.0)	{$deduction = 1-.05;}
+	elsif ($dropout<=2.75)	{$deduction = 1-.35;}
+	elsif ($dropout<=3.25)	{$deduction = 1-.30;}
+	elsif ($dropout<=4.00)	{$deduction = 1-.25;}
+	elsif ($dropout<=5.00)	{$deduction = 1-.20;}
+	elsif ($dropout<=6.50)	{$deduction = 1-.15;}
+	elsif ($dropout<=10.0)	{$deduction = 1-.10;}
+	elsif ($dropout<=15.0)	{$deduction = 1-.05;}
 	else			{$deduction = 1;}
 
 
