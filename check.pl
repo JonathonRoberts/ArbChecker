@@ -253,7 +253,7 @@ if($allmarketsflag){
 }
 else{
 	if($url){
-		&findwinnersfrompage;
+		&findwinnersfrompage($url);
 	}
 	&findwinners;
 }
