@@ -12,7 +12,7 @@ my $allmarketsflag=0;
 my $displayflag=0;
 my $helpflag=0;
 my $live=0;
-my $url;
+my $urlflag;
 my $search;
 
 GetOptions (
@@ -21,7 +21,7 @@ GetOptions (
 	"help|h" => \$helpflag,
 	"live|l" => \$live,
 	"search|s=s" => \$search,
-	"url|u=s" => \$url,)
+	"url|u=s" => \$urlflag,)
 or die("Error in command line arguments\n");
 
 if($helpflag){
@@ -203,7 +203,7 @@ sub findallfrompage{
 	#chomp(my $input = <STDIN>);
 	my $input = $_[0];
 	unless($input =~ m#^https\://www\.oddschecker\.com/.+#i){
-		print "\nInvalid input!\nInput must be of the form: https://www.oddschecker.com/football/\n\n";
+		print "\nInvalid input!\nInput must be of the form: https://www.oddschecker.com/football\n\n";
 		exit;
 	}
 	print("Searching all markets in $input\n");
@@ -246,14 +246,18 @@ if($displayflag){
 }
 
 if($allmarketsflag){
-	if($url){
-		&findallfrompage($url)
+	if($urlflag){
+		&findallfrompage($urlflag)
 	}
-	&findall;
+	else{
+		&findall;
+	}
 }
 else{
-	if($url){
-		&findwinnersfrompage($url);
+	if($urlflag){
+		&findwinnersfrompage($urlflag);
 	}
-	&findwinners;
+	else{
+		&findwinners;
+	}
 }
