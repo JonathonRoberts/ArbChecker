@@ -8,7 +8,7 @@ sub calculate{
 	my @odds;
 	if($ARGV[0]){
 		foreach(@ARGV){
-			unless(/^\d+$/){die "Invalid Input!\n"}
+			unless(/^\d+\.?\d*$/){die "Invalid Input!\n"}
 		}
 		@odds = @ARGV;
 	}
@@ -59,7 +59,7 @@ sub changeodds{
 			next;
 		}
 		s/^\s+//;
-		if(/(\d\.?\d*\s+)\d\.?\d*/){
+		if(/(\d+\.?\d*\s+)\d\.?\d*/){
 			$_ =~ s/\s+/ /;
 			system("clear;");
 			print "Odds changed!\n";
