@@ -5,6 +5,37 @@
 
 use strict;
 use warnings;
+use Getopt::Long;
+
+
+my $allmarketsflag=0;
+my $displayflag=0;
+my $helpflag=0;
+my $live=0;
+my $url;
+my $search;
+
+GetOptions (
+	"all|a" => \$allmarketsflag,
+	"display|d" => \$displayflag,
+	"help|h" => \$helpflag,
+	"live|l" => \$live,
+	"search|s=s" => \$search,
+	"url|u=s" => \$url,)
+or die("Error in command line arguments\n");
+
+if($helpflag){
+	print(
+"
+ --all, -a\t\t\t- search all markets, default search is just winner markets
+ --display, -d\t\t\t- display the highest level of searchable markets
+ --help, -h\t\t\t- show this help message
+ --live, -l\t\t\t- include live matches in search
+ --search <string>, -s <string>\t- search for market which include <string>
+ --url <url>, -u <url>\t\t- search for markets from a markets page such as https://www.oddschecker.com/football/
+\n");
+	exit 1;
+}
 
 sub profit{
 	my $percentageprofit = 0;
@@ -20,6 +51,15 @@ sub getodds{
 	my $html = qx{curl --insecure --silent $url};
 	my @html = split /\n/,$html;
 	my @odds;
+
+	#Filter out live matches
+	unless($live){
+		foreach(@html){
+			if(/class=\"button no-arrow blink in-play\"\>In Play\</){return -100;}
+		}
+}
+
+	#Find best odds
 	foreach(@html){
 		while(/data-best-dig/){
 			s/data-best-dig\=\"(\d+\.?\d*)\"/$1/;
@@ -27,7 +67,7 @@ sub getodds{
 		}
 	}
 	if(length($odds[0])){return @odds;}
-	else { return 1;}
+	else { return -100;}
 }
 
 sub getgames{
@@ -102,9 +142,16 @@ sub getallmarkets{
 
 sub findall{
 	#Using a simple search returns all markets for search results
-	print("Searching all markets\n");
-	print("Input events filter(e.g. football): ");
-	chomp(my $input = <STDIN>);
+	my $input;
+	if($search){
+		$input = $search;
+		print("Searching all markets for \"$input\"\n");
+	}
+	else{
+		print("Searching all markets\n");
+		print("Input events search filter(e.g. football): ");
+		chomp($input = <STDIN>);
+	}
 	foreach my $page(&crawlsite){
 			#Filter
 			if($page =~ m#$input#){
@@ -124,9 +171,16 @@ sub findall{
 
 sub findwinners{
 	#Using a simple search returns all winner markets for search results
-	print("Searching winner markets\n");
-	print("Input events filter(e.g. football): ");
-	chomp(my $input = <STDIN>);
+	my $input;
+	if($search){
+		$input = $search;
+		print("Searching all markets for \"$input\"\n");
+	}
+	else{
+		print("Searching winner markets\n");
+		print("Input events search filter(e.g. football): ");
+		chomp($input = <STDIN>);
+	}
 	foreach my $workingpage(&crawlsite){
 		#Filter
 		if($workingpage =~ m#$input#){
@@ -145,9 +199,14 @@ sub findwinners{
 
 sub findallfrompage{
 	#Given a page e.g https://www.oddschecker.org/football returns all markets found from the page
-	print("Searching all markets\n");
-	print "Enter url of matches page: ";
-	chomp(my $input = <STDIN>);
+	#print "Enter url of matches page: ";
+	#chomp(my $input = <STDIN>);
+	my $input = $_[0];
+	unless($input =~ m#^https\://www\.oddschecker\.com/.+#i){
+		print "\nInvalid input!\nInput must be of the form: https://www.oddschecker.com/football/\n\n";
+		exit;
+	}
+	print("Searching all markets in $input\n");
 	foreach(&getallmarkets(&getgames($input))){
 		my $profit = &profit(&getodds($_));
 		if(-0.1 < $profit && $profit < 15){
@@ -160,9 +219,15 @@ sub findallfrompage{
 
 sub findwinnersfrompage{
 	#Given a page e.g https://www.oddschecker.org/football returns all winner markets found from the page
-	print("Searching winner markets\n");
-	print "Enter url of matches page: ";
-	chomp(my $input = <STDIN>);
+	#print("Searching winner markets\n");
+	#print "Enter url of matches page: ";
+	#chomp(my $input = <STDIN>);
+	my $input = $_[0];
+	unless($input =~ m#^https\://www\.oddschecker\.com/.+#i){
+		print "\nInvalid input!\nInput must be of the form: https://www.oddschecker.com/football/\n\n";
+		exit;
+	}
+	print("Searching winner markets in $input\n");
 	foreach(&getgames($input)){
 		my $profit = &profit(&getodds($_));
 		if(-0.1 < $profit && $profit < 15){
@@ -174,8 +239,21 @@ sub findwinnersfrompage{
 	print "\n";
 }
 
-#&findall;
-&findwinners;
-#&findallfrompage;
-#&findwinnersfrompage;
-#&list;
+
+if($displayflag){
+	&list;
+	exit;
+}
+
+if($allmarketsflag){
+	if($url){
+		&findallfrompage($url)
+	}
+	&findall;
+}
+else{
+	if($url){
+		&findwinnersfrompage;
+	}
+	&findwinners;
+}

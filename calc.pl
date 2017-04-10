@@ -1,21 +1,34 @@
 #!/usr/bin/perl
-print "Content-Type: text/html\n\n";
 
 use strict;
 use warnings;
 use Switch;
 
 sub calculate{
-	#@odds = @_;
-	my @odds = (2,3);
+	my @odds;
+	if($ARGV[0]){
+		foreach(@ARGV){
+			unless(/^\d+$/){die "Invalid Input!\n"}
+		}
+		@odds = @ARGV;
+	}
+	else{@odds = (2,3);}
 	my $returnodds = &setreturn(@odds);
 	my $totalstake = 100;
 
+	#First pass
 	system("clear;");
-	&help;
+	print "c - change odds : q - quit\n";
+	printf("Total stake: %.2f\n",$totalstake);
+	my $returncash = $totalstake * $returnodds;
+	printf("Total return: %.2f\n",$returncash);
+	print "Odds\tStake\n";
+	foreach(@odds){
+		printf("%.2f\t%.2f\n",$_,$returncash/$_);
+	}
 	print "Input total stake: ";
 
-	while(<>){
+	while(<STDIN>){
 		chomp;
 		switch ($_){
 			case "c" {@odds = &changeodds;$returnodds = &setreturn(@odds);}
@@ -25,7 +38,7 @@ sub calculate{
 		}
 
 		#Output
-		&help;
+		print "c - change odds : q - quit\n";
 		printf("Total stake: %.2f\n",$totalstake);
 		my $returncash = $totalstake * $returnodds;
 		printf("Total return: %.2f\n",$returncash);
@@ -68,10 +81,6 @@ sub setreturn{
 	}
 	return 1/$returnodds;
 
-}
-sub help{
-	print "c - change odds : ";
-	print "q - quit\n";
 }
 
 &calculate;
