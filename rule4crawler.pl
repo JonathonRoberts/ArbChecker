@@ -143,21 +143,24 @@ sub rule4{
 		$avg /=$counter;
 		#print"normal = $returnodds\nhigh = $high\nlow = $low\navg = $avg\n"
 		my $worst = $low - $returnodds;
-		#my $mean = $avg - $returnodds;
+		my $mean = $avg - $returnodds;
 		my $best = $high - $returnodds;
-		print "Worstcase : $worst\n";
-		#print "   Mean   : $mean\n";
-		print " Bestcase : $best\n";
-		#return $mean;
+		#	printf("Worstcase %6.3f | Mean %6.3f Bestcase : %6.3f || ",$worst,$mean,$best);
+		#	printf(printf("Worstcase %7.3f | Mean %7.3f | Normal %7.3f | Bestcase : %7.3f\t",$low,$avg, $returnodds,$high);
+			printf(" %6.3f  | %6.3f | %6.3f || ",$worst,$mean,$best);
+			printf("%7.3f | %7.3f | %7.3f | %7.3f\t",$low,$avg, $returnodds,$high);
 	}
 
 }
 
 sub crawlrule4{
 	my $input = "https://www.oddschecker.com/horse-racing";
-	print("Searching winner markets in $input\n");
+	print("Crawling winner markets from $input\nand calculating the change inprofit when rule 4 is applied to a dutched bet\n\n");
+	print "     Difference in odds    ||\t\t  Actual odds\t\t  |\tRace\n";
+	print "Worstcase|  Mean  |Bestcase||Worstcase|  Mean   |  Normal |Bestcase\n";
 	foreach(&getgames($input)){
 		&rule4(&getodds($_));
+		print "$_\n";
 		}
 
 
