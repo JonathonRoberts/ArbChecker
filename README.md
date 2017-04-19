@@ -1,5 +1,8 @@
 # ArbChecker
 
+**bettingstats.pl**
+Calculates per bookie net winnings from a csv file
+
 **calc.pl**
 A calculator for determining how much to bet on each market when Dutching
 
