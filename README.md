@@ -1,5 +1,9 @@
 # ArbChecker
 
+**Required Perl modules**
+GetOpt::Long
+Switch
+
 **bettingstats.pl**
 Calculates per bookie net winnings from a csv file
 
