@@ -4,6 +4,8 @@ use strict;
 use warnings;
 
 #Prints the resultant odds after a single non runner and rule 4 has been applied
+# !Note!
+# The actual returns will be lower as we are only using the best odds
 
 sub getodds{
 	#Gets odds from the comparison page, returns a list of "data-best-dig" values
