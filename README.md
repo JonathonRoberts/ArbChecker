@@ -1,20 +1,27 @@
-# ArbChecker
+# ezXPath
+Simplified functions for returning strings from html and xml hosted locally and online.
 
-**Required Perl modules**
-GetOpt::Long
-Switch
+Also contains ezCurl
 
-**bettingstats.pl**
-Calculates per bookie net winnings from a csv file
 
-**calc.pl**
-A calculator for determining how much to bet on each market when Dutching
+Examples are in main.c
 
-**check.pl**
-Scrapes oddschecker in search of arbitrage opportunities
 
-**example spreadsheet.ods**
-An example spreadsheet for keeping track of bets placed that when converted to csv is compatible with bettingstats.pl
+As this uses the libxml and curl libraries this requires the flags:
 
-**rule4.pl**
-Scrapes oddschecker horseracing markets and returns the best and  worst possible differences in return from a dutched horseracing bet if Rule4(c) is enacted
+CFLAGS +=-c `xml2-config --cflags` `curl-config --cflags` -Wall
+
+LIBS=`xml2-config --libs` `curl-config --libs`
+
+
+char *ezcurl(char *url)
+
+int extern ezXPathXML(char *website,char *expr,char *output[])
+
+int extern ezXPathXMLFile(char *file,char *expr,char *output[])
+
+int extern ezXPathHTML(char *website,char *expr,char *output[])
+
+int extern ezXPathHTMLFile(char *file,char *expr,char *output[])
+
+int extern ezXPathHTMLFile(char *file,char *expr,char *output[])
