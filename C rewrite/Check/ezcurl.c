@@ -70,7 +70,6 @@ extern char *ezcurl(char *url)
   free(chunk.memory);
   curl_global_cleanup();
   return "";
-
 }
 
 
