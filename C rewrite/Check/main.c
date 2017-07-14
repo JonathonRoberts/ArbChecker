@@ -25,7 +25,7 @@ float setreturn(int noods, float odds[]);
 int scanwinner(char * website);
 int footballquick();
 int findraces();
-int crawlall();
+int crawlall(char *search);
 
 struct Market Markets[400];
 int arrno = 0;
@@ -33,7 +33,7 @@ int arrno = 0;
 void printstruct(int i);
 
 int main(){
-	crawlall();
+	crawlall("football");
 
 	/*
 	footballquick();
@@ -191,7 +191,7 @@ int findraces(){
 	}
 	return 1;
 }
-int crawlall(){
+int crawlall(char *search){
 	char *sitemapoutput[MAXELEMENTS];
 	char *tmpoutput[MAXELEMENTS];
 	int size;
@@ -201,7 +201,7 @@ int crawlall(){
 	regex_t regex2;
 	int errorcheck = regcomp(&regex2, "^https://www.oddschecker.com/[^[:space:]]+$",REG_EXTENDED);
 	regex_t regex;
-	int toplevelsearch = regcomp(&regex, ".*",REG_EXTENDED);
+	int toplevelsearch = regcomp(&regex, search,REG_EXTENDED);
 
         size = ezXPathXML("https://www.oddschecker.com/sitemap.xml","/*[local-name() = 'sitemapindex']/*[local-name() = 'sitemap']/*[local-name() = 'loc']",sitemapoutput);
 
@@ -220,8 +220,9 @@ int crawlall(){
 									printf("\n");
 									printstruct(arrno++);
 								}
-								else
-									printf(".");
+								else{
+									arrno++;
+								}
 							}
 							free(tmpoutput[c]);
 						}
