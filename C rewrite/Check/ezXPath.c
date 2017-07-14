@@ -37,8 +37,8 @@ int extern ezXPathXML(char *website,char *expr,char *output[]){
 			}
 			else{
 				element = xmlNodeListGetString(doc,nodeset->nodeTab[i]->xmlChildrenNode,1);
-				output[i] = (char *)malloc(strlen(element));
-				strxfrm(output[i],element,strlen(element)+1);
+				output[i] = (char *)malloc(strlen(element)+8);
+				strxfrm(output[i],element,strlen(element)+2);
 				xmlFree(element);
 			}
 		}
@@ -72,8 +72,8 @@ int extern ezXPathXMLFile(char *file,char *expr,char *output[]){
 			}
 			else{
 				element = xmlNodeListGetString(doc,nodeset->nodeTab[i]->xmlChildrenNode,1);
-				output[i] = (char *)malloc(strlen(element));
-				strxfrm(output[i],element,strlen(element)+1);
+				output[i] = (char *)malloc(strlen(element)+8);
+				strxfrm(output[i],element,strlen(element)+2);
 				xmlFree(element);
 			}
 		}
@@ -106,8 +106,8 @@ int extern ezXPathHTML(char *website,char *expr,char *output[]){
 			}
 			else{
 				element = xmlNodeListGetString(doc,nodeset->nodeTab[i]->xmlChildrenNode,1);
-				output[i] = (char *)malloc(strlen(element));
-				strxfrm(output[i],element,strlen(element)+1);
+				output[i] = (char *)malloc(strlen(element)+8);
+				strxfrm(output[i],element,strlen(element)+2);
 				xmlFree(element);
 			}
 		}
@@ -141,8 +141,8 @@ int extern ezXPathHTMLFile(char *file,char *expr,char *output[]){
 			}
 			else{
 				element = xmlNodeListGetString(doc,nodeset->nodeTab[i]->xmlChildrenNode,1);
-				output[i] = (char *)malloc(strlen(element));
-				strxfrm(output[i],element,strlen(element)+1);
+				output[i] = (char *)malloc(strlen(element)+8);
+				strxfrm(output[i],element,strlen(element)+2);
 				xmlFree(element);
 			}
 		}

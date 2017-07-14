@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <string.h>
+#include <regex.h>
 #include "ezXPath.c"
 
-#define MAXELEMENTS 200 /* Maximum number of results to return */
+#define MAXELEMENTS 3000 /* Maximum number of results to return */
 
  /*
  * Using XPath to return the best odds for an event
@@ -24,6 +25,7 @@ float setreturn(int noods, float odds[]);
 int scanwinner(char * website);
 int footballquick();
 int findraces();
+int crawlall();
 
 struct Market Markets[400];
 int arrno = 0;
@@ -31,8 +33,12 @@ int arrno = 0;
 void printstruct(int i);
 
 int main(){
+	crawlall();
+
+	/*
 	footballquick();
 	findraces();
+	*/
 	return 0;
 }
 int scanwinner(char * website){
@@ -134,7 +140,6 @@ int footballquick(){
 }
 
 void printstruct(int i){
-   int n;
    /*printf("%s\n",Markets[i].title);*/
       printf("%s\n",Markets[i].website);
 	/*
@@ -146,8 +151,10 @@ void printstruct(int i){
    }
 	*/
 	printf("Returnodds = %f\n",Markets[i].returnodds);
-   //printf("sport - %c\n",Markets[i].sport);
-   //printf("date - %d\n",Markets[i].date);
+	/*
+   printf("sport - %c\n",Markets[i].sport);
+   printf("date - %d\n",Markets[i].date);
+   */
 }
 
 float setreturn(int noods, float odds[]){
@@ -165,9 +172,6 @@ int findraces(){
 	int size;
 	char *website = "https://www.oddschecker.com/horse-racing";
 	char *xpath = "id('mc')/section[1]/div/div/div/div/div/div/a/@href";
-	/* Causing segfaults when scanning this, today Epsom is 7, might be an ezcurl  issue
-	 * char *xpath = "id('mc')/section[1]/div/div/div/div[position()=7]/div/div/a/@href";
-	 */
 
         size = ezXPathHTML(website,xpath,output);
 	for(i=0;i<size;i++){
@@ -185,5 +189,47 @@ int findraces(){
 			arrno++;
 		}
 	}
+	return 1;
+}
+int crawlall(){
+	char *sitemapoutput[MAXELEMENTS];
+	char *tmpoutput[MAXELEMENTS];
+	int size;
+	int i;
+	int c;
+	int tmpsize;
+	regex_t regex2;
+	int errorcheck = regcomp(&regex2, "^https://www.oddschecker.com/[^[:space:]]+$",REG_EXTENDED);
+	regex_t regex;
+	int toplevelsearch = regcomp(&regex, ".*",REG_EXTENDED);
+
+        size = ezXPathXML("https://www.oddschecker.com/sitemap.xml","/*[local-name() = 'sitemapindex']/*[local-name() = 'sitemap']/*[local-name() = 'loc']",sitemapoutput);
+
+        if(size!=0){
+                for(i =2;i<size;i++){
+			if((toplevelsearch = regexec(&regex, sitemapoutput[i],0,NULL,0))==0){/*select which branch in sitemap to scan for best odds*/
+				printf("Searching all events under: %s\n",sitemapoutput[i]);
+
+				if((errorcheck = regexec(&regex2, sitemapoutput[i],0,NULL,0))==0){/*protects against naff input*/
+					tmpsize = ezXPathXML(sitemapoutput[i],"/*[local-name() = 'urlset']/*[local-name() = 'url']/*[local-name() = 'loc']",tmpoutput);
+					if(tmpsize!=0){
+						for(c = 0;c<tmpsize;c++){
+							if((errorcheck = regexec(&regex2, tmpoutput[c],0,NULL,0))==0){/*protects against naff input*/
+								scanwinner(tmpoutput[c]);
+								if(Markets[arrno].returnodds>1){
+									printf("\n");
+									printstruct(arrno++);
+								}
+								else
+									printf(".");
+							}
+							free(tmpoutput[c]);
+						}
+					}
+				}
+			}
+			free(sitemapoutput[i]);
+		}
+        }
 	return 1;
 }
