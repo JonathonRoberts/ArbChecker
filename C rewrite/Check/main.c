@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <regex.h>
+#include <unistd.h>
 #include "ezXPath.c"
 
 #define MAXELEMENTS 3000 /* Maximum number of results to return */
@@ -32,14 +33,79 @@ int arrno = 0;
 
 void printstruct(int i);
 
-int main(){
-	crawlall("football");
+void getoptlonghelp(char *progname){
+	fprintf(stderr,"\
+Usage: %s [-adhlqu |-s <string>|-u <url>]\n\
+--all, -a\t\t\t- search all markets, default search is just winner markets\n\
+--display, -d\t\t\t- display the highest level of searchable markets\n\
+--help, -h\t\t\t- show this help message\n\
+--live, -l\t\t\t- include live matches in search\n\
+--quick -q\t\t- quickly searches popular football winner markets\n\
+--search <string>, -s <string>\t- search for market which include <string>\n\
+--url <url>, -u <url>\t\t- search for markets from a markets page such as https://www.oddschecker.com/football/\n",progname);
+}
+void help(char *progname){
+	fprintf(stderr,"\
+Usage: %s [-adhlqu |-s <string>|-u <url>]\n\
+-a\t\t- search all markets, default search is just winner markets\n\
+-d\t\t- display the highest level of searchable markets\n\
+-h\t\t- show this help message\n\
+-l\t\t- include live matches in search\n\
+-q\t\t- quickly searches popular football winner markets\n\
+-s <string>\t- search for market which include <string>\n\
+-u <url>\t- search for markets from a markets page such as https://www.oddschecker.com/football/\n",progname);
+}
+
+int live = 0;
+int all = 0;
+
+int main(int argc, char *argv[]){
+	if(argc == 1){
+		help(argv[0]);
+		return 1;
+	}
+	int ch;
+	while ((ch = getopt(argc, argv, "adhlqsu?")) != -1)
+			switch(ch) {
+			case 'a':
+				/*print all markets*/
+				all = 1;
+				/*FALL THROUGH*/
+			case 'd':
+				/*prints highest level of markets for searching*/
+				break;
+			case 'h':
+				help(argv[0]);
+				break;
+			case 'l':
+				/*include live matches in search*/
+				live = 1;
+				/*FALL THROUGH*/
+			case 'q':
+				/*quick search*/
+				footballquick();
+				/*tennisquick();*/
+				break;
+			case 's':
+				/*search*/
+				crawlall(argv[argc-1]);
+				break;
+			case 'u':
+				/*scan from markets url, e.g https://www.oddschecker.com/football/ */
+				break;
+			case '?':
+				help(argv[0]);
+				break;
+			default:
+				help(argv[0]);
+	}
+	return 1;
 
 	/*
 	footballquick();
+	crawlall("football");
 	findraces();
 	*/
-	return 0;
 }
 int scanwinner(char * website){
 	char *output[MAXELEMENTS];
@@ -74,6 +140,10 @@ int scanwinner(char * website){
 
                            }
 			free(output[i]);
+		}
+		if(Markets[arrno].noodds==1){//if only one possible outcome
+			Markets[arrno].noodds--;
+			return 0;
 		}
 		Markets[arrno].returnodds = setreturn(Markets[arrno].noodds,Markets[arrno].odds);
 		return 1;
@@ -215,13 +285,14 @@ int crawlall(char *search){
 					if(tmpsize!=0){
 						for(c = 0;c<tmpsize;c++){
 							if((errorcheck = regexec(&regex2, tmpoutput[c],0,NULL,0))==0){/*protects against naff input*/
-								scanwinner(tmpoutput[c]);
-								if(Markets[arrno].returnodds>1){
-									printf("\n");
-									printstruct(arrno++);
-								}
-								else{
-									arrno++;
+								if(scanwinner(tmpoutput[c])){
+									if(Markets[arrno].returnodds>1){
+										printf("\n");
+										printstruct(arrno++);
+									}
+									else{
+										arrno++;
+									}
 								}
 							}
 							free(tmpoutput[c]);
