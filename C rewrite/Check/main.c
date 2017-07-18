@@ -19,6 +19,7 @@ struct Market{
 	char *title;
 	int date;
 	int noodds;
+	int live;
 	float returnodds;
 };
 
@@ -56,8 +57,10 @@ Usage: %s [-adhlqu |-s <string>|-u <url>]\n\
 -u <url>\t- search for markets from a markets page such as https://www.oddschecker.com/football/\n",progname);
 }
 
-int live = 0;
+int liveflag = 0;
+int quickflag = 0;
 int all = 0;
+int crawlallflag = 0;
 
 int main(int argc, char *argv[]){
 	if(argc == 1){
@@ -79,16 +82,15 @@ int main(int argc, char *argv[]){
 				break;
 			case 'l':
 				/*include live matches in search*/
-				live = 1;
+				liveflag = 1;
 				/*FALL THROUGH*/
 			case 'q':
 				/*quick search*/
-				footballquick();
-				/*tennisquick();*/
+				quickflag = 1;
 				break;
 			case 's':
 				/*search*/
-				crawlall(argv[argc-1]);
+				crawlallflag = 1;
 				break;
 			case 'u':
 				/*scan from markets url, e.g https://www.oddschecker.com/football/ */
@@ -99,6 +101,13 @@ int main(int argc, char *argv[]){
 			default:
 				help(argv[0]);
 	}
+	if(quickflag){
+		footballquick();
+		/*tennisquick();*/
+	}
+	if(crawlallflag)
+		crawlall(argv[argc-1]);
+
 	return 1;
 
 	/*
@@ -113,8 +122,15 @@ int scanwinner(char * website){
 	int size;
 	char *xpath = "id('t1')/tr/@data-best-dig |\
 		id('t1')/tr/@data-bname";
+
+	/*	XPath for checking date and whether the event is live
+		id('betting-odds')/section[1]/div/div/div/div/span[1]|\
+		id('betting-odds')/section[1]/div/div/div/div/span[2]/@class|\
+	*/
+
         size = ezXPathHTML(website,xpath,output);
 	if(size!=0){
+
 		strlcpy(Markets[arrno].website, website,120);
 		for(i =0;i<size;i++){
                         if(i%2==0){
@@ -178,7 +194,8 @@ int footballquick(){
 	char *website = "https://www.oddschecker.com/football";
 	char *xpath = "id('fixtures')/div/table/tbody/tr/td/p/span/@data-name |\
 		id('fixtures')/div/table/tbody/tr/td/@data-best-odds |\
-		id('fixtures')/div/table/tbody/tr/td/a/@href";
+		id('fixtures')/div/table/tbody/tr/td/a/@href|\
+		id('fixtures')/div/table/tbody/tr/td/a/@class";
         size = ezXPathHTML(website,xpath,output);
 	int n;
 	if(size!=0){
@@ -197,34 +214,43 @@ int footballquick(){
 			free(output[i++]);
 			strlcpy(Markets[arrno].outcome[n++] , output[i], 50);
 			free(output[i++]);
+			if(strcmp("button btn-1-small blink in-play",output[i])==0){
+				Markets[arrno].live = 1;
+			}
+			else{
+				Markets[arrno].live = 0;
+			}
+			free(output[i++]);
 			strlcpy(Markets[arrno].website , "https://www.oddschecker.com/", 100);
 			strlcat(Markets[arrno].website , output[i], 100);
 			free(output[i++]);
 			if((Markets[arrno].returnodds = setreturn(Markets[arrno].noodds,Markets[arrno].odds))>1)
-				printstruct(arrno++);
+				printstruct(arrno);
+			arrno++;
 		}
 
 	}
-	printf("\n");
 	return 1;
 }
 
 void printstruct(int i){
-   /*printf("%s\n",Markets[i].title);*/
-      printf("%s\n",Markets[i].website);
-	/*
-   for(n = 0;n<Markets[i].noodds;n++){
-      printf("%f - ",Markets[i].odds[n]);
-      printf("%s",Markets[i].outcome[n]);
-      printf("%s",Markets[i].bestbookie[n]);
-      printf("\n");
-   }
-	*/
-	printf("Returnodds = %f\n",Markets[i].returnodds);
-	/*
-   printf("sport - %c\n",Markets[i].sport);
-   printf("date - %d\n",Markets[i].date);
-   */
+	if(liveflag>=Markets[i].live){
+	   /*printf("%s\n",Markets[i].title);*/
+	      printf("%s\n",Markets[i].website);
+		/*
+	   for(n = 0;n<Markets[i].noodds;n++){
+	      printf("%f - ",Markets[i].odds[n]);
+	      printf("%s",Markets[i].outcome[n]);
+	      printf("%s",Markets[i].bestbookie[n]);
+	      printf("\n");
+	   }
+		*/
+		printf("Returnodds = %f\n",Markets[i].returnodds);
+		/*
+	   printf("sport - %c\n",Markets[i].sport);
+	   printf("date - %d\n",Markets[i].date);
+	   */
+	}
 }
 
 float setreturn(int noods, float odds[]){

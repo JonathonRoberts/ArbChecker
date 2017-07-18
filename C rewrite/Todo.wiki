@@ -7,8 +7,8 @@
 * [X] -	Copy launch options from Perl program
 * [ ] -	Create tennisquick() among other sports
 * [ ] -	Revise array limits or dynamicaly allocate space
-* [ ] -	Extract more data from matches:
-	* [ ] live, past, or future
+* [.] -	Extract more data from matches:
+	* [X] live, past, or future
 	* [ ] date
 	* [ ] time
 	* [ ] sport
