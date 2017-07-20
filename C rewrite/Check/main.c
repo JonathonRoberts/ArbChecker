@@ -2,6 +2,7 @@
 #include <string.h>
 #include <regex.h>
 #include <unistd.h>
+#include <time.h>
 #include "ezXPath.c"
 
 #define MAXELEMENTS 3000 /* Maximum number of results to return */
@@ -17,7 +18,7 @@ struct Market{
 	char *bestbookie[MAXELEMENTS/2];
 	char sport;
 	char *title;
-	int date;
+	time_t date;
 	int noodds;
 	int live;
 	float returnodds;
@@ -28,6 +29,7 @@ int scanwinner(char * website);
 int footballquick();
 int findraces();
 int crawlall(char *search);
+time_t getdatetime(char *datestring);
 
 struct Market Markets[400];
 int arrno = 0;
@@ -118,43 +120,72 @@ int main(int argc, char *argv[]){
 }
 int scanwinner(char * website){
 	char *output[MAXELEMENTS];
-	int i;
 	int size;
-	char *xpath = "id('t1')/tr/@data-best-dig |\
+	int i=0;
+	int n = 0;
+	char *xpath = "id('betting-odds')/section[1]/div/div/div/div/span[1]|\
+		id('betting-odds')/section[1]/div/div/div/div/span[2]/@class|\
+		id('t1')/tr/@data-best-dig |\
 		id('t1')/tr/@data-bname";
+	regex_t regex;
+	int datecheck = regcomp(&regex, ".+ [[:digit:]][[:digit:]]:",REG_EXTENDED);
+	regex_t regex2;
+	int livecheck = regcomp(&regex2, "button no-arrow blink in-play",REG_EXTENDED);
 
 	/*	XPath for checking date and whether the event is live
-		id('betting-odds')/section[1]/div/div/div/div/span[1]|\
-		id('betting-odds')/section[1]/div/div/div/div/span[2]/@class|\
 	*/
 
         size = ezXPathHTML(website,xpath,output);
 	if(size!=0){
+		if((datecheck = regexec(&regex, output[i],0,NULL,0))==0){
+			Markets[arrno].date = getdatetime(output[i]);
+			free(output[i]);
+				i++;
+		}
+		else
+			Markets[arrno].date = 0;
+		if((livecheck = regexec(&regex2, output[i],0,NULL,0))==0){
+			Markets[arrno].live = 1;
+			free(output[i]);
+				i++;
+		}
+			/*
+		Thursday 20th July / 17:30
+		button no-arrow blink in-play
+		*/
 
 		strlcpy(Markets[arrno].website, website,120);
-		for(i =0;i<size;i++){
-                        if(i%2==0){
-                           Markets[arrno].noodds++;
-                           if(i==0){
-                              Markets[arrno].odds[i] = atof(output[i]);
-			      if(Markets[arrno].odds[i] == 9999.0){
-				   Markets[arrno].noodds--;
-				   i++;
-			      }
 
-                           }
-                           else{
-                              Markets[arrno].odds[i/2] = atof(output[i]);
-			      if(Markets[arrno].odds[i/2] == 9999.0){
-				   Markets[arrno].noodds--;
-				   i++;
-			      }
-                           }
-                        }
-                        else{
-                              strlcpy(Markets[arrno].outcome[((i+1)/2)-1] , output[i], 50);
+		Markets[arrno].noodds = 1;
+		Markets[arrno].odds[n] = atof(output[i]);
+		free(output[i]);
+		i++;
+		if(Markets[arrno].odds[n] == 9999.0){
+			Markets[arrno].noodds--;
+			i+=2;
+		}
+		else{
+			strlcpy(Markets[arrno].outcome[n] , output[i], 50);
+			free(output[i]);
+			n++;
+			i++;
+		}
 
-                           }
+		for(;i<size;i++){
+			Markets[arrno].noodds++;
+			Markets[arrno].odds[n] = atof(output[i]);
+			free(output[i]);
+			i++;
+			if(Markets[arrno].odds[n] == 9999.0){
+				Markets[arrno].noodds--;
+				free(output[i]);
+				i++;
+			}
+			else{
+				strlcpy(Markets[arrno].outcome[n] , output[i], 50);
+				n++;
+			}
+			//printf("outcome %s\n",output[i]);
 			free(output[i]);
 		}
 		if(Markets[arrno].noodds==1){//if only one possible outcome
@@ -224,7 +255,7 @@ int footballquick(){
 			strlcpy(Markets[arrno].website , "https://www.oddschecker.com/", 100);
 			strlcat(Markets[arrno].website , output[i], 100);
 			free(output[i++]);
-			if((Markets[arrno].returnodds = setreturn(Markets[arrno].noodds,Markets[arrno].odds))>1)
+			if((Markets[arrno].returnodds = setreturn(Markets[arrno].noodds,Markets[arrno].odds))<1)
 				printstruct(arrno);
 			arrno++;
 		}
@@ -235,6 +266,7 @@ int footballquick(){
 
 void printstruct(int i){
 	if(liveflag>=Markets[i].live){
+		printf("\n");
 	   /*printf("%s\n",Markets[i].title);*/
 	      printf("%s\n",Markets[i].website);
 		/*
@@ -245,18 +277,23 @@ void printstruct(int i){
 	      printf("\n");
 	   }
 		*/
+		if(Markets[i].date != 0){ /* Only print the date if we know it */
+			struct tm *tm = localtime(&Markets[i].date);
+			char s[64];
+			strftime(s, sizeof(s), "%c", tm);
+			printf("%s\n", s);
+		}
 		printf("Returnodds = %f\n",Markets[i].returnodds);
 		/*
 	   printf("sport - %c\n",Markets[i].sport);
-	   printf("date - %d\n",Markets[i].date);
 	   */
 	}
 }
 
-float setreturn(int noods, float odds[]){
+float setreturn(int noodds, float odds[]){
 	int i;
 	float returnodds = 0;
-	for(i = 0;i<noods;i++){
+	for(i = 0;i<noodds;i++){
 		returnodds += (1/odds[i]);
 	}
 	return (1/returnodds);
@@ -312,8 +349,7 @@ int crawlall(char *search){
 						for(c = 0;c<tmpsize;c++){
 							if((errorcheck = regexec(&regex2, tmpoutput[c],0,NULL,0))==0){/*protects against naff input*/
 								if(scanwinner(tmpoutput[c])){
-									if(Markets[arrno].returnodds>1){
-										printf("\n");
+									if(Markets[arrno].returnodds!=0){
 										printstruct(arrno++);
 									}
 									else{
@@ -331,3 +367,41 @@ int crawlall(char *search){
         }
 	return 1;
 }
+time_t getdatetime(char *datestring){
+        /* Example: datestring = "Friday 21st July / 16:00";*/
+	struct tm tm;
+        int mon,dom,hh, mm;
+        char *dow;
+	char *doms;
+        char *mons;
+        time_t time_value;
+
+        sscanf(datestring, "%s %d%2s %s / %d:%d",&dow, &dom, &doms, &mons, &hh, &mm);
+
+        tm.tm_year = 2017 - 1900;  /* HARDCODED YEAR, I have not seen any markets
+                                    * from 2018 so I don't actually know how it's
+                                    * displayed on Oddschecker
+                                    */
+        if(strcmp((char*)&mons,"January")==0)mon =  0;
+        else if(strcmp((char *)&mons,"February")==0)mon =  1;
+        else if(strcmp((char *)&mons,"March")==0)mon =  2;
+        else if(strcmp((char *)&mons,"April")==0)mon =  3;
+        else if(strcmp((char *)&mons,"May")==0)mon =  4;
+        else if(strcmp((char *)&mons,"June")==0)mon =  5;
+        else if(strcmp((char *)&mons,"July")==0)mon =  6;
+        else if(strcmp((char *)&mons,"August")==0)mon =  7;
+        else if(strcmp((char *)&mons,"September")==0)mon =  8;
+        else if(strcmp((char *)&mons,"October")==0)mon =  9;
+        else if(strcmp((char *)&mons,"November")==0)mon =  10;
+        else mon =  11;
+        tm.tm_mon = mon;
+
+        tm.tm_mday = dom;
+        tm.tm_hour = hh;
+        tm.tm_min = mm;
+        tm.tm_sec = 0;
+        tm.tm_isdst = 1;
+        time_value = mktime(&tm);
+	return time_value;
+}
+

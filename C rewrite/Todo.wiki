@@ -7,14 +7,14 @@
 * [X] -	Copy launch options from Perl program
 * [ ] -	Create tennisquick() among other sports
 * [ ] -	Revise array limits or dynamicaly allocate space
-* [.] -	Extract more data from matches:
+* [o] -	Extract more data from matches:
 	* [X] live, past, or future
-	* [ ] date
-	* [ ] time
+	* [X] date
+	* [X] time
 	* [ ] sport
 	* [ ] best bookie
 	(I think the time it will take to process  will be minimal and then
 	I can use this data to filter matches
 * [ ] -	Integrate with calculator, might require a GUI so we can have buttons.
 	This is the only reason to keep all of the data in Markets[] around
-* [ ] -	Fix compiler warnings for ezXPath
+* [ ] -	Fix tabs
