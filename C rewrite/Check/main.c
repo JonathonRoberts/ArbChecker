@@ -30,8 +30,9 @@ int footballquick();
 int findraces();
 int crawlall(char *search);
 time_t getdatetime(char *datestring);
+void list();
 
-struct Market Markets[400];
+struct Market Markets[MAXELEMENTS];
 int arrno = 0;
 
 void printstruct(int i);
@@ -44,8 +45,7 @@ Usage: %s [-adhlqu |-s <string>|-u <url>]\n\
 --help, -h\t\t\t- show this help message\n\
 --live, -l\t\t\t- include live matches in search\n\
 --quick -q\t\t- quickly searches popular football winner markets\n\
---search <string>, -s <string>\t- search for market which include <string>\n\
---url <url>, -u <url>\t\t- search for markets from a markets page such as https://www.oddschecker.com/football/\n",progname);
+--search <string>, -s <string>\t- search for market which include <string>\n",progname);
 }
 void help(char *progname){
 	fprintf(stderr,"\
@@ -55,14 +55,15 @@ Usage: %s [-adhlqu |-s <string>|-u <url>]\n\
 -h\t\t- show this help message\n\
 -l\t\t- include live matches in search\n\
 -q\t\t- quickly searches popular football winner markets\n\
--s <string>\t- search for market which include <string>\n\
--u <url>\t- search for markets from a markets page such as https://www.oddschecker.com/football/\n",progname);
+-s <string>\t- search for market which include <string>\n",progname);
 }
 
 int liveflag = 0;
 int quickflag = 0;
 int all = 0;
 int crawlallflag = 0;
+int displayflag = 0;
+int searchflag = 0;
 
 int main(int argc, char *argv[]){
 	if(argc == 1){
@@ -70,14 +71,15 @@ int main(int argc, char *argv[]){
 		return 1;
 	}
 	int ch;
-	while ((ch = getopt(argc, argv, "adhlqsu?")) != -1)
+	while ((ch = getopt(argc, argv, "adhlqs?")) != -1)
 			switch(ch) {
 			case 'a':
 				/*print all markets*/
 				all = 1;
-				/*FALL THROUGH*/
+				break;
 			case 'd':
 				/*prints highest level of markets for searching*/
+				displayflag = 1;
 				break;
 			case 'h':
 				help(argv[0]);
@@ -85,17 +87,14 @@ int main(int argc, char *argv[]){
 			case 'l':
 				/*include live matches in search*/
 				liveflag = 1;
-				/*FALL THROUGH*/
+				break;
 			case 'q':
 				/*quick search*/
 				quickflag = 1;
 				break;
 			case 's':
 				/*search*/
-				crawlallflag = 1;
-				break;
-			case 'u':
-				/*scan from markets url, e.g https://www.oddschecker.com/football/ */
+				searchflag = 1;
 				break;
 			case '?':
 				help(argv[0]);
@@ -103,11 +102,18 @@ int main(int argc, char *argv[]){
 			default:
 				help(argv[0]);
 	}
+	if(all){
+		printf("Searching all markets:\n");
+		crawlall(".");
+	}
+	if(displayflag){
+		list();
+	}
 	if(quickflag){
 		footballquick();
 		/*tennisquick();*/
 	}
-	if(crawlallflag)
+	if(searchflag)
 		crawlall(argv[argc-1]);
 
 	return 1;
@@ -283,6 +289,8 @@ void printstruct(int i){
 			strftime(s, sizeof(s), "%c", tm);
 			printf("%s\n", s);
 		}
+		if(Markets[arrno].live == 1)
+			printf("LIVE\n");
 		printf("Returnodds = %f\n",Markets[i].returnodds);
 		/*
 	   printf("sport - %c\n",Markets[i].sport);
@@ -366,6 +374,26 @@ int crawlall(char *search){
 		}
         }
 	return 1;
+}
+void list(){
+	char *sitemapoutput[MAXELEMENTS];
+	int size;
+	int i;
+	char tmp[50];
+	regex_t regex2;
+	int errorcheck = regcomp(&regex2, "^https://www.oddschecker.com/[^[:space:]]+$",REG_EXTENDED);
+
+        size = ezXPathXML("https://www.oddschecker.com/sitemap.xml","/*[local-name() = 'sitemapindex']/*[local-name() = 'sitemap']/*[local-name() = 'loc']",sitemapoutput);
+
+        if(size!=0){
+                for(i =2;i<size;i++){
+			if((errorcheck = regexec(&regex2, sitemapoutput[i],0,NULL,0))==0){/*protects against naff input*/
+				sscanf(sitemapoutput[i], "https://www.oddschecker.com/sport/%[^/]/sitemap.xml",tmp);
+				printf("%s\n",tmp);
+			}
+			free(sitemapoutput[i]);
+		}
+        }
 }
 time_t getdatetime(char *datestring){
         /* Example: datestring = "Friday 21st July / 16:00";*/

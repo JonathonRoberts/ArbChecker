@@ -3,8 +3,6 @@
 		hard with racing with non runners)
 	* [X] -	Check number of odds is 1<
 
-* [ ] -	Copy formatting and all functions from Perl program
-* [X] -	Copy launch options from Perl program
 * [ ] -	Create tennisquick() among other sports
 * [ ] -	Revise array limits or dynamicaly allocate space
 * [o] -	Extract more data from matches:
@@ -18,3 +16,5 @@
 * [ ] -	Integrate with calculator, might require a GUI so we can have buttons.
 	This is the only reason to keep all of the data in Markets[] around
 * [ ] -	Fix tabs
+* [ ] -	Sort output of list()
+* [ ] -	Filter by date
