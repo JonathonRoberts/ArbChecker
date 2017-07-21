@@ -23,6 +23,7 @@ struct Market{
 	int live;
 	float returnodds;
 };
+struct Market Markets[MAXELEMENTS];
 
 float setreturn(int noods, float odds[]);
 int scanwinner(char * website);
@@ -31,10 +32,6 @@ int findraces();
 int crawlall(char *search);
 time_t getdatetime(char *datestring);
 void list();
-
-struct Market Markets[MAXELEMENTS];
-int arrno = 0;
-
 void printstruct(int i);
 
 void getoptlonghelp(char *progname){
@@ -55,8 +52,13 @@ Usage: %s [-adhlqu |-s <string>|-u <url>]\n\
 -h\t\t- show this help message\n\
 -l\t\t- include live matches in search\n\
 -q\t\t- quickly searches popular football winner markets\n\
--s <string>\t- search for market which include <string>\n",progname);
+-s <string>\t- search for market which include <string>\n\
+-t \t\t- only show events which occur wihtin 24 hours\n",progname);
 }
+
+int arrno = 0;
+time_t timenow;
+time_t timefilter;
 
 int liveflag = 0;
 int quickflag = 0;
@@ -64,6 +66,7 @@ int all = 0;
 int crawlallflag = 0;
 int displayflag = 0;
 int searchflag = 0;
+int timeflag = 0;
 
 int main(int argc, char *argv[]){
 	if(argc == 1){
@@ -71,7 +74,7 @@ int main(int argc, char *argv[]){
 		return 1;
 	}
 	int ch;
-	while ((ch = getopt(argc, argv, "adhlqs?")) != -1)
+	while ((ch = getopt(argc, argv, "adhlqst?")) != -1)
 			switch(ch) {
 			case 'a':
 				/*print all markets*/
@@ -96,11 +99,19 @@ int main(int argc, char *argv[]){
 				/*search*/
 				searchflag = 1;
 				break;
+			case 't':
+				/*time*/
+				timeflag = 1;
+				break;
 			case '?':
 				help(argv[0]);
 				break;
 			default:
 				help(argv[0]);
+	}
+	if(timeflag){
+		time(&timenow);
+		timefilter = timenow+24*60*60;
 	}
 	if(all){
 		printf("Searching all markets:\n");
@@ -271,6 +282,7 @@ int footballquick(){
 }
 
 void printstruct(int i){
+	if((timeflag&&Markets[i].date>=timenow&&Markets[i].date<=timefilter)||timeflag == 0)
 	if(liveflag>=Markets[i].live){
 		printf("\n");
 	   /*printf("%s\n",Markets[i].title);*/
