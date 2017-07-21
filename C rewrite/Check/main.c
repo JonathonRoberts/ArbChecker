@@ -31,6 +31,7 @@ int footballquick();
 int findraces();
 int crawlall(char *search);
 time_t getdatetime(char *datestring);
+static int cmp (const void *p1, const void *p2);
 void list();
 void printstruct(int i);
 
@@ -153,7 +154,7 @@ int scanwinner(char * website){
 	*/
 
         size = ezXPathHTML(website,xpath,output);
-	if(size!=0){
+	if(size>1){
 		if((datecheck = regexec(&regex, output[i],0,NULL,0))==0){
 			Markets[arrno].date = getdatetime(output[i]);
 			free(output[i]);
@@ -166,9 +167,10 @@ int scanwinner(char * website){
 			free(output[i]);
 				i++;
 		}
-			/*
-		Thursday 20th July / 17:30
-		button no-arrow blink in-play
+		/* The two statements above attempt to find the date and whether the event
+		 * is currently live, they are looking for output[i] which looks like:
+		 * Thursday 20th July / 17:30
+		 * button no-arrow blink in-play
 		*/
 
 		strlcpy(Markets[arrno].website, website,120);
@@ -179,7 +181,7 @@ int scanwinner(char * website){
 		i++;
 		if(Markets[arrno].odds[n] == 9999.0){
 			Markets[arrno].noodds--;
-			i+=2;
+			i++;
 		}
 		else{
 			strlcpy(Markets[arrno].outcome[n] , output[i], 50);
@@ -195,17 +197,14 @@ int scanwinner(char * website){
 			i++;
 			if(Markets[arrno].odds[n] == 9999.0){
 				Markets[arrno].noodds--;
-				free(output[i]);
-				i++;
 			}
 			else{
 				strlcpy(Markets[arrno].outcome[n] , output[i], 50);
 				n++;
 			}
-			//printf("outcome %s\n",output[i]);
 			free(output[i]);
 		}
-		if(Markets[arrno].noodds==1){//if only one possible outcome
+		if(Markets[arrno].noodds<=1){//one or less possible outcomes
 			Markets[arrno].noodds--;
 			return 0;
 		}
@@ -272,7 +271,7 @@ int footballquick(){
 			strlcpy(Markets[arrno].website , "https://www.oddschecker.com/", 100);
 			strlcat(Markets[arrno].website , output[i], 100);
 			free(output[i++]);
-			if((Markets[arrno].returnodds = setreturn(Markets[arrno].noodds,Markets[arrno].odds))<1)
+			if((Markets[arrno].returnodds = setreturn(Markets[arrno].noodds,Markets[arrno].odds))>1)
 				printstruct(arrno);
 			arrno++;
 		}
@@ -282,7 +281,7 @@ int footballquick(){
 }
 
 void printstruct(int i){
-	if((timeflag&&Markets[i].date>=timenow&&Markets[i].date<=timefilter)||timeflag == 0)
+	if((timeflag == 0||timeflag&&Markets[i].date>=timenow&&Markets[i].date<=timefilter))
 	if(liveflag>=Markets[i].live){
 		printf("\n");
 	   /*printf("%s\n",Markets[i].title);*/
@@ -369,7 +368,7 @@ int crawlall(char *search){
 						for(c = 0;c<tmpsize;c++){
 							if((errorcheck = regexec(&regex2, tmpoutput[c],0,NULL,0))==0){/*protects against naff input*/
 								if(scanwinner(tmpoutput[c])){
-									if(Markets[arrno].returnodds!=0){
+									if(Markets[arrno].returnodds>=1){
 										printstruct(arrno++);
 									}
 									else{
@@ -387,6 +386,11 @@ int crawlall(char *search){
         }
 	return 1;
 }
+
+static int cmp (const void *p1, const void *p2){
+	/* simple ascii sorting for qsort */
+	return strcmp(* (char * const *) p1, * (char * const *) p2);
+}
 void list(){
 	char *sitemapoutput[MAXELEMENTS];
 	int size;
@@ -398,6 +402,7 @@ void list(){
         size = ezXPathXML("https://www.oddschecker.com/sitemap.xml","/*[local-name() = 'sitemapindex']/*[local-name() = 'sitemap']/*[local-name() = 'loc']",sitemapoutput);
 
         if(size!=0){
+		qsort(sitemapoutput,size,sizeof(char *),cmp);
                 for(i =2;i<size;i++){
 			if((errorcheck = regexec(&regex2, sitemapoutput[i],0,NULL,0))==0){/*protects against naff input*/
 				sscanf(sitemapoutput[i], "https://www.oddschecker.com/sport/%[^/]/sitemap.xml",tmp);

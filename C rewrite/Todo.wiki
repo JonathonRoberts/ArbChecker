@@ -7,6 +7,7 @@
 * [ ] -	Revise array limits or dynamicaly allocate space
 * [o] -	Extract more data from matches:
 	* [X] live, past, or future
+	* [ ] racing live, past, or future
 	* [X] date
 	* [X] time
 	* [ ] sport
@@ -16,5 +17,5 @@
 * [ ] -	Integrate with calculator, might require a GUI so we can have buttons.
 	This is the only reason to keep all of the data in Markets[] around
 * [ ] -	Fix tabs
-* [ ] -	Sort output of list()
+* [X] -	Sort output of list()
 * [X] -	Filter by date
