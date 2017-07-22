@@ -16,7 +16,7 @@ struct Market{
 	float odds[MAXELEMENTS/2];
 	char outcome[MAXELEMENTS/2][50];
 	char *bestbookie[MAXELEMENTS/2];
-	char sport;
+	char sport[50];
 	char *title;
 	time_t date;
 	int noodds;
@@ -34,6 +34,7 @@ time_t getdatetime(char *datestring);
 static int cmp (const void *p1, const void *p2);
 void list();
 void printstruct(int i);
+void extracturldata(char *website);
 
 void getoptlonghelp(char *progname){
 	fprintf(stderr,"\
@@ -68,6 +69,7 @@ int crawlallflag = 0;
 int displayflag = 0;
 int searchflag = 0;
 int timeflag = 0;
+int month,day,year;
 
 int main(int argc, char *argv[]){
 	if(argc == 1){
@@ -110,10 +112,15 @@ int main(int argc, char *argv[]){
 			default:
 				help(argv[0]);
 	}
-	if(timeflag){
-		time(&timenow);
-		timefilter = timenow+24*60*60;
-	}
+
+	/* initialise time filter */
+	time(&timenow);
+	timefilter = timenow+24*60*60;
+	struct tm *current = localtime(&timenow);
+	month = current->tm_mon;
+	day = current->tm_mday;
+	year = current->tm_year;
+
 	if(all){
 		printf("Searching all markets:\n");
 		crawlall(".");
@@ -167,12 +174,14 @@ int scanwinner(char * website){
 			free(output[i]);
 				i++;
 		}
+
 		/* The two statements above attempt to find the date and whether the event
 		 * is currently live, they are looking for output[i] which looks like:
 		 * Thursday 20th July / 17:30
 		 * button no-arrow blink in-play
 		*/
 
+		extracturldata(website);
 		strlcpy(Markets[arrno].website, website,120);
 
 		Markets[arrno].noodds = 1;
@@ -450,3 +459,39 @@ time_t getdatetime(char *datestring){
 	return time_value;
 }
 
+void extracturldata(char *website){
+	int hh,mm;
+	char shh[4];
+	char smm[4];
+	char tmp[30];
+	char *sport;
+	struct tm tm;
+	if((sscanf(website,"https://www.oddschecker.com/horse-racing/%[^/]/%2s:%2s/",tmp,shh,smm))==3){
+		mm = atoi(smm);
+		hh = atoi(shh);
+		tm.tm_year = year;
+		tm.tm_mon = month;
+		tm.tm_mday = day;
+		tm.tm_hour = hh;
+		tm.tm_min = mm;
+		tm.tm_sec = 0;
+		tm.tm_isdst = 1;
+		Markets[arrno].date = mktime(&tm);
+	}
+	if((sscanf(website,"https://www.oddschecker.com/greyhounds/%[^/]/%2s:%2s/",tmp,shh,smm))==3){
+		mm = atoi(smm);
+		hh = atoi(shh);
+		tm.tm_year = year;
+		tm.tm_mon = month;
+		tm.tm_mday = day;
+		tm.tm_hour = hh;
+		tm.tm_min = mm;
+		tm.tm_sec = 0;
+		tm.tm_isdst = 1;
+		Markets[arrno].date = mktime(&tm);
+	}
+	if((sscanf(website,"https://www.oddschecker.com/%[^/]/",sport)==1)){
+		strlcpy(Markets[arrno].sport,sport,49);
+	}
+	return;
+}

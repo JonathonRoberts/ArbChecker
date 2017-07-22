@@ -5,12 +5,12 @@
 
 * [ ] -	Create tennisquick() among other sports
 * [ ] -	Revise array limits or dynamicaly allocate space
-* [o] -	Extract more data from matches:
+* [O] -	Extract more data from matches:
 	* [X] live, past, or future
-	* [ ] racing live, past, or future
+	* [X] racing date
 	* [X] date
 	* [X] time
-	* [ ] sport
+	* [X] sport
 	* [ ] best bookie
 	(I think the time it will take to process  will be minimal and then
 	I can use this data to filter matches
