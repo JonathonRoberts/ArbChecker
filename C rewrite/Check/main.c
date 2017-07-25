@@ -160,7 +160,7 @@ int scanwinner(char * website){
 	/*	XPath for checking date and whether the event is live
 	*/
 
-        size = ezXPathHTML(website,xpath,output);
+	size = ezXPathHTML(website,xpath,output);
 	if(size>1){
 		if((datecheck = regexec(&regex, output[i],0,NULL,0))==0){
 			Markets[arrno].date = getdatetime(output[i]);
@@ -223,20 +223,20 @@ int scanwinner(char * website){
 		return 0;
 	}
 
-        /*I'll have to use something like the below to find out the bookie for each outcome
-        size = ezXPathHTML("https://www.oddschecker.com/football/champions-league/rijeka-v-tns/winner","id('t1')/tr/td[position() > 1 and not(position() > 26)]/@data-odig",output);
+	/*I'll have to use something like the below to find out the bookie for each outcome
+	size = ezXPathHTML("https://www.oddschecker.com/football/champions-league/rijeka-v-tns/winner","id('t1')/tr/td[position() > 1 and not(position() > 26)]/@data-odig",output);
 	if(size!=0){
 		printf("Found %d elements:\n",size);
 		for(i =0;i<size;i++){
-                        if(i%25==0){
-                           printf("\n");
-                        }
+			if(i%25==0){
+				printf("\n");
+			}
 			printf("%s ",output[i]);
 			free(output[i]);
 		}
-                printf("\n");
+		printf("\n");
 	}
-        */
+	*/
 }
 
 int footballquick(){
@@ -252,7 +252,7 @@ int footballquick(){
 		id('fixtures')/div/table/tbody/tr/td/@data-best-odds |\
 		id('fixtures')/div/table/tbody/tr/td/a/@href|\
 		id('fixtures')/div/table/tbody/tr/td/a/@class";
-        size = ezXPathHTML(website,xpath,output);
+	size = ezXPathHTML(website,xpath,output);
 	int n;
 	if(size!=0){
 		for(i =0;i<size;){
@@ -293,15 +293,15 @@ void printstruct(int i){
 	if((timeflag == 0||timeflag&&Markets[i].date>=timenow&&Markets[i].date<=timefilter))
 	if(liveflag>=Markets[i].live){
 		printf("\n");
-	   /*printf("%s\n",Markets[i].title);*/
-	      printf("%s\n",Markets[i].website);
+		/*printf("%s\n",Markets[i].title);*/
+		printf("%s\n",Markets[i].website);
 		/*
-	   for(n = 0;n<Markets[i].noodds;n++){
-	      printf("%f - ",Markets[i].odds[n]);
-	      printf("%s",Markets[i].outcome[n]);
-	      printf("%s",Markets[i].bestbookie[n]);
-	      printf("\n");
-	   }
+		for(n = 0;n<Markets[i].noodds;n++){
+			printf("%f - ",Markets[i].odds[n]);
+			printf("%s",Markets[i].outcome[n]);
+			printf("%s",Markets[i].bestbookie[n]);
+			printf("\n");
+		}
 		*/
 		if(Markets[i].date != 0){ /* Only print the date if we know it */
 			struct tm *tm = localtime(&Markets[i].date);
@@ -313,8 +313,8 @@ void printstruct(int i){
 			printf("LIVE\n");
 		printf("Returnodds = %f\n",Markets[i].returnodds);
 		/*
-	   printf("sport - %c\n",Markets[i].sport);
-	   */
+		printf("sport - %c\n",Markets[i].sport);
+		*/
 	}
 }
 
@@ -334,7 +334,7 @@ int findraces(){
 	char *website = "https://www.oddschecker.com/horse-racing";
 	char *xpath = "id('mc')/section[1]/div/div/div/div/div/div/a/@href";
 
-        size = ezXPathHTML(website,xpath,output);
+	size = ezXPathHTML(website,xpath,output);
 	for(i=0;i<size;i++){
 		strcpy(Markets[arrno].website,"https://www.oddschecker.com");
 		strcat(Markets[arrno].website,output[i]);
@@ -364,10 +364,10 @@ int crawlall(char *search){
 	regex_t regex;
 	int toplevelsearch = regcomp(&regex, search,REG_EXTENDED);
 
-        size = ezXPathXML("https://www.oddschecker.com/sitemap.xml","/*[local-name() = 'sitemapindex']/*[local-name() = 'sitemap']/*[local-name() = 'loc']",sitemapoutput);
+	size = ezXPathXML("https://www.oddschecker.com/sitemap.xml","/*[local-name() = 'sitemapindex']/*[local-name() = 'sitemap']/*[local-name() = 'loc']",sitemapoutput);
 
-        if(size!=0){
-                for(i =2;i<size;i++){
+	if(size!=0){
+		for(i =2;i<size;i++){
 			if((toplevelsearch = regexec(&regex, sitemapoutput[i],0,NULL,0))==0){/*select which branch in sitemap to scan for best odds*/
 				printf("Searching all events under: %s\n",sitemapoutput[i]);
 
@@ -392,7 +392,7 @@ int crawlall(char *search){
 			}
 			free(sitemapoutput[i]);
 		}
-        }
+	}
 	return 1;
 }
 
@@ -408,54 +408,54 @@ void list(){
 	regex_t regex2;
 	int errorcheck = regcomp(&regex2, "^https://www.oddschecker.com/[^[:space:]]+$",REG_EXTENDED);
 
-        size = ezXPathXML("https://www.oddschecker.com/sitemap.xml","/*[local-name() = 'sitemapindex']/*[local-name() = 'sitemap']/*[local-name() = 'loc']",sitemapoutput);
+	size = ezXPathXML("https://www.oddschecker.com/sitemap.xml","/*[local-name() = 'sitemapindex']/*[local-name() = 'sitemap']/*[local-name() = 'loc']",sitemapoutput);
 
-        if(size!=0){
+	if(size!=0){
 		qsort(sitemapoutput,size,sizeof(char *),cmp);
-                for(i =2;i<size;i++){
+		for(i =2;i<size;i++){
 			if((errorcheck = regexec(&regex2, sitemapoutput[i],0,NULL,0))==0){/*protects against naff input*/
 				sscanf(sitemapoutput[i], "https://www.oddschecker.com/sport/%[^/]/sitemap.xml",tmp);
 				printf("%s\n",tmp);
 			}
 			free(sitemapoutput[i]);
 		}
-        }
+	}
 }
 time_t getdatetime(char *datestring){
-        /* Example: datestring = "Friday 21st July / 16:00";*/
+	/* Example: datestring = "Friday 21st July / 16:00";*/
 	struct tm tm;
-        int mon,dom,hh, mm;
-        char *dow;
+	int mon,dom,hh, mm;
+	char *dow;
 	char *doms;
-        char *mons;
-        time_t time_value;
+	char *mons;
+	time_t time_value;
 
-        sscanf(datestring, "%s %d%2s %s / %d:%d",&dow, &dom, &doms, &mons, &hh, &mm);
+	sscanf(datestring, "%s %d%2s %s / %d:%d",&dow, &dom, &doms, &mons, &hh, &mm);
 
-        tm.tm_year = 2017 - 1900;  /* HARDCODED YEAR, I have not seen any markets
-                                    * from 2018 so I don't actually know how it's
-                                    * displayed on Oddschecker
-                                    */
-        if(strcmp((char*)&mons,"January")==0)mon =  0;
-        else if(strcmp((char *)&mons,"February")==0)mon =  1;
-        else if(strcmp((char *)&mons,"March")==0)mon =  2;
-        else if(strcmp((char *)&mons,"April")==0)mon =  3;
-        else if(strcmp((char *)&mons,"May")==0)mon =  4;
-        else if(strcmp((char *)&mons,"June")==0)mon =  5;
-        else if(strcmp((char *)&mons,"July")==0)mon =  6;
-        else if(strcmp((char *)&mons,"August")==0)mon =  7;
-        else if(strcmp((char *)&mons,"September")==0)mon =  8;
-        else if(strcmp((char *)&mons,"October")==0)mon =  9;
-        else if(strcmp((char *)&mons,"November")==0)mon =  10;
-        else mon =  11;
-        tm.tm_mon = mon;
+	tm.tm_year = 2017 - 1900;	/* HARDCODED YEAR, I have not seen any markets
+					* from 2018 so I don't actually know how it's
+					* displayed on Oddschecker
+					*/
+	if(strcmp((char*)&mons,"January")==0)mon = 0;
+	else if(strcmp((char *)&mons,"February")==0)mon = 1;
+	else if(strcmp((char *)&mons,"March")==0)mon = 2;
+	else if(strcmp((char *)&mons,"April")==0)mon = 3;
+	else if(strcmp((char *)&mons,"May")==0)mon = 4;
+	else if(strcmp((char *)&mons,"June")==0)mon = 5;
+	else if(strcmp((char *)&mons,"July")==0)mon = 6;
+	else if(strcmp((char *)&mons,"August")==0)mon = 7;
+	else if(strcmp((char *)&mons,"September")==0)mon = 8;
+	else if(strcmp((char *)&mons,"October")==0)mon = 9;
+	else if(strcmp((char *)&mons,"November")==0)mon = 10;
+	else mon = 11;
+	tm.tm_mon = mon;
 
-        tm.tm_mday = dom;
-        tm.tm_hour = hh;
-        tm.tm_min = mm;
-        tm.tm_sec = 0;
-        tm.tm_isdst = 1;
-        time_value = mktime(&tm);
+	tm.tm_mday = dom;
+	tm.tm_hour = hh;
+	tm.tm_min = mm;
+	tm.tm_sec = 0;
+	tm.tm_isdst = 1;
+	time_value = mktime(&tm);
 	return time_value;
 }
 
