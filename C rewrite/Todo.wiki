@@ -3,8 +3,12 @@
 		hard with racing with non runners)
 	* [X] -	Check number of odds is 1<
 
-* [ ] -	Create tennisquick() among other sports
+* [ ] -	Create tennisquick() among other sports, or make a generic scraper for these pages, possibly using a 2 outcome scraper and a 3 outcome scraper and a list of sports and the number winners market outcomes
+* [ ] -	crawlall() goes 10 tabs deep, lessen that
+* [ ] - scanwinners is the slowest part of the crawling process, for racing we can definitely filter this to only return future events
+* [ ] - use the /betting-markets page to find more markets, it's a lot of information to scrape so maybe only choose certain markets
 * [ ] -	Revise array limits or dynamicaly allocate space
+* [ ] - Move limits to a #define file
 * [O] -	Extract more data from matches:
 	* [X] live, past, or future
 	* [X] racing date
@@ -16,6 +20,6 @@
 	I can use this data to filter matches
 * [ ] -	Integrate with calculator, might require a GUI so we can have buttons.
 	This is the only reason to keep all of the data in Markets[] around
-* [ ] -	Fix tabs
+* [X] -	Fix tabs so they are not just three spaces
 * [X] -	Sort output of list()
 * [X] -	Filter by date
