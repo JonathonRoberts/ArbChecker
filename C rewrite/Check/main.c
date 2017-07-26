@@ -464,7 +464,7 @@ void extracturldata(char *website){
 	char shh[4];
 	char smm[4];
 	char tmp[30];
-	char *sport;
+	char sport[50];
 	struct tm tm;
 	if((sscanf(website,"https://www.oddschecker.com/horse-racing/%[^/]/%2s:%2s/",tmp,shh,smm))==3){
 		mm = atoi(smm);
@@ -477,8 +477,9 @@ void extracturldata(char *website){
 		tm.tm_sec = 0;
 		tm.tm_isdst = 1;
 		Markets[arrno].date = mktime(&tm);
+		strlcpy(Markets[arrno].sport,"horse-racing",49);
 	}
-	if((sscanf(website,"https://www.oddschecker.com/greyhounds/%[^/]/%2s:%2s/",tmp,shh,smm))==3){
+	else if((sscanf(website,"https://www.oddschecker.com/greyhounds/%[^/]/%2s:%2s/",tmp,shh,smm))==3){
 		mm = atoi(smm);
 		hh = atoi(shh);
 		tm.tm_year = year;
@@ -489,8 +490,9 @@ void extracturldata(char *website){
 		tm.tm_sec = 0;
 		tm.tm_isdst = 1;
 		Markets[arrno].date = mktime(&tm);
+		strlcpy(Markets[arrno].sport,"greyhounds",49);
 	}
-	if((sscanf(website,"https://www.oddschecker.com/%[^/]/",sport)==1)){
+	else if((sscanf(website,"https://www.oddschecker.com/%[^/]/",sport)==1)){
 		strlcpy(Markets[arrno].sport,sport,49);
 	}
 	return;
