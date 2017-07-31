@@ -70,6 +70,7 @@ int displayflag = 0;
 int searchflag = 0;
 int timeflag = 0;
 int month,day,year;
+int returnthreshold = 1;
 
 int main(int argc, char *argv[]){
 	if(argc == 1){
@@ -280,7 +281,7 @@ int footballquick(){
 			strlcpy(Markets[arrno].website , "https://www.oddschecker.com/", 100);
 			strlcat(Markets[arrno].website , output[i], 100);
 			free(output[i++]);
-			if((Markets[arrno].returnodds = setreturn(Markets[arrno].noodds,Markets[arrno].odds))>1)
+			if((Markets[arrno].returnodds = setreturn(Markets[arrno].noodds,Markets[arrno].odds))>returnthreshold)
 				printstruct(arrno);
 			arrno++;
 		}
@@ -366,32 +367,26 @@ int crawlall(char *search){
 
 	size = ezXPathXML("https://www.oddschecker.com/sitemap.xml","/*[local-name() = 'sitemapindex']/*[local-name() = 'sitemap']/*[local-name() = 'loc']",sitemapoutput);
 
-	if(size!=0){
-		for(i =2;i<size;i++){
-			if((toplevelsearch = regexec(&regex, sitemapoutput[i],0,NULL,0))==0){/*select which branch in sitemap to scan for best odds*/
-				printf("Searching all events under: %s\n",sitemapoutput[i]);
+	for(i =2;size!=0&&i<size;i++){
+		if((toplevelsearch = regexec(&regex, sitemapoutput[i],0,NULL,0))==0){/*select which branch in sitemap to scan for best odds*/
+			printf("Searching all events under: %s\n",sitemapoutput[i]);
 
-				if((errorcheck = regexec(&regex2, sitemapoutput[i],0,NULL,0))==0){/*protects against naff input*/
-					tmpsize = ezXPathXML(sitemapoutput[i],"/*[local-name() = 'urlset']/*[local-name() = 'url']/*[local-name() = 'loc']",tmpoutput);
-					if(tmpsize!=0){
-						for(c = 0;c<tmpsize;c++){
-							if((errorcheck = regexec(&regex2, tmpoutput[c],0,NULL,0))==0){/*protects against naff input*/
-								if(scanwinner(tmpoutput[c])){
-									if(Markets[arrno].returnodds>=1){
-										printstruct(arrno++);
-									}
-									else{
-										arrno++;
-									}
-								}
-							}
-							free(tmpoutput[c]);
-						}
+			if((errorcheck = regexec(&regex2, sitemapoutput[i],0,NULL,0))==0){/*protects against naff input*/
+				tmpsize = ezXPathXML(sitemapoutput[i],"/*[local-name() = 'urlset']/*[local-name() = 'url']/*[local-name() = 'loc']",tmpoutput);
+				for(c = 0;tmpsize!=0&&c<tmpsize;c++){
+					if((errorcheck = regexec(&regex2, tmpoutput[c],0,NULL,0))==0
+							&& (scanwinner(tmpoutput[c]))
+							&& (Markets[arrno].returnodds>=returnthreshold)){
+						printstruct(arrno++);
 					}
+					else{
+						arrno++;
+					}
+					free(tmpoutput[c]);
 				}
 			}
-			free(sitemapoutput[i]);
 		}
+		free(sitemapoutput[i]);
 	}
 	return 1;
 }
@@ -400,6 +395,7 @@ static int cmp (const void *p1, const void *p2){
 	/* simple ascii sorting for qsort */
 	return strcmp(* (char * const *) p1, * (char * const *) p2);
 }
+
 void list(){
 	char *sitemapoutput[MAXELEMENTS];
 	int size;

@@ -4,7 +4,7 @@
 	* [X] -	Check number of odds is 1<
 
 * [ ] -	Create tennisquick() among other sports, or make a generic scraper for these pages, possibly using a 2 outcome scraper and a 3 outcome scraper and a list of sports and the number winners market outcomes
-* [ ] -	crawlall() goes 10 tabs deep, lessen that
+* [X] -	crawlall() goes 10 tabs deep, lessen that
 * [ ] - scanwinners is the slowest part of the crawling process, for racing we can definitely filter this to only return future events
 * [ ] - use the /betting-markets page to find more markets, it's a lot of information to scrape so maybe only choose certain markets
 * [ ] -	Revise array limits or dynamicaly allocate space
