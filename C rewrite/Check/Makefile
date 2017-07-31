@@ -3,7 +3,7 @@ CFLAGS +=-c `xml2-config --cflags` `curl-config --cflags` -Wall
 LIBS=`xml2-config --libs` `curl-config --libs`
 SOURCES = main.c
 OBJECTS=$(SOURCES:.c=.o)
-EXECUTABLE=a.out
+EXECUTABLE=check
 all: $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)

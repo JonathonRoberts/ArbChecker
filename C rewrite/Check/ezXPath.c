@@ -13,117 +13,36 @@ int extern ezXPathXMLFile(char *file,char *expr,char *output[]);
 int extern ezXPathHTML(char *website,char *expr,char *output[]);
 int extern ezXPathHTMLFile(char *file,char *expr,char *output[]);
 
+int XPathQuery(xmlDocPtr doc ,char *expr,char *output[]);
 xmlNodeSetPtr getnodeset(xmlDocPtr doc,xmlChar *xpath);
 
 int extern ezXPathXML(char *website,char *expr,char *output[]){
 	xmlInitParser();
-	int i;
-	int size = 0;
 	xmlDocPtr doc = xmlReadDoc(ezcurl(website),website,NULL, 1);
-	xmlChar *xpath = (xmlChar*) expr;
-	xmlNodeSetPtr nodeset;
-	xmlXPathObjectPtr result;
-	xmlChar *element;
-	result = getnodeset(doc,xpath);
-
-	if(result){
-		nodeset = result->nodesetval;
-		size = nodeset->nodeNr;
-		*output=malloc(size);
-		for(i=0;i<size;i++){
-			if(strlen(xmlNodeListGetString(doc,nodeset->nodeTab[i]->xmlChildrenNode,1)) == 0){
-				output[i] = (char *)malloc(4);
-				strcpy(output[i] , "");
-			}
-			else{
-				element = xmlNodeListGetString(doc,nodeset->nodeTab[i]->xmlChildrenNode,1);
-				output[i] = (char *)malloc(strlen(element)+8);
-				strxfrm(output[i],element,strlen(element)+2);
-				xmlFree(element);
-			}
-		}
-		xmlXPathFreeObject(result);
-	}
-
-	xmlFreeDoc(doc);
-	xmlCleanupParser();
-	return size;
+	return XPathQuery(doc,expr,output);
 }
 
 int extern ezXPathXMLFile(char *file,char *expr,char *output[]){
 	xmlInitParser();
-	int i;
-	int size = 0;
-	 xmlDocPtr doc = xmlReadFile(file, NULL, 1);
-	xmlChar *xpath = (xmlChar*) expr;
-	xmlNodeSetPtr nodeset;
-	xmlXPathObjectPtr result;
-	xmlChar *element;
-	result = getnodeset(doc,xpath);
-
-	if(result){
-		nodeset = result->nodesetval;
-		size = nodeset->nodeNr;
-		*output=malloc(size);
-		for(i=0;i<size;i++){
-			if(strlen(xmlNodeListGetString(doc,nodeset->nodeTab[i]->xmlChildrenNode,1)) == 0){
-				output[i] = (char *)malloc(4);
-				strcpy(output[i] , "");
-			}
-			else{
-				element = xmlNodeListGetString(doc,nodeset->nodeTab[i]->xmlChildrenNode,1);
-				output[i] = (char *)malloc(strlen(element)+8);
-				strxfrm(output[i],element,strlen(element)+2);
-				xmlFree(element);
-			}
-		}
-		xmlXPathFreeObject(result);
-	}
-
-	xmlFreeDoc(doc);
-	xmlCleanupParser();
-	return size;
+	xmlDocPtr doc = xmlReadFile(file, NULL, 1);
+	return XPathQuery(doc,expr,output);
 }
+
 int extern ezXPathHTML(char *website,char *expr,char *output[]){
 	xmlInitParser();
-	int i;
-	int size = 0;
 	xmlDocPtr doc = htmlReadDoc(ezcurl(website),website,NULL, HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING | HTML_PARSE_NONET | HTML_PARSE_IGNORE_ENC );
-	xmlChar *xpath = (xmlChar*) expr;
-	xmlNodeSetPtr nodeset;
-	xmlXPathObjectPtr result;
-	xmlChar *element;
-	result = getnodeset(doc,xpath);
-
-	if(result){
-		nodeset = result->nodesetval;
-		size = nodeset->nodeNr;
-		*output=malloc(size);
-		for(i=0;i<size;i++){
-			if(strlen(xmlNodeListGetString(doc,nodeset->nodeTab[i]->xmlChildrenNode,1)) == 0){
-				output[i] = (char *)malloc(4);
-				strcpy(output[i] , "");
-			}
-			else{
-				element = xmlNodeListGetString(doc,nodeset->nodeTab[i]->xmlChildrenNode,1);
-				output[i] = (char *)malloc(strlen(element)+8);
-				strxfrm(output[i],element,strlen(element)+2);
-				xmlFree(element);
-			}
-		}
-		xmlXPathFreeObject(result);
-	}
-
-	xmlFreeDoc(doc);
-	xmlCleanupParser();
-	return size;
+	return XPathQuery(doc,expr,output);
 }
 
 int extern ezXPathHTMLFile(char *file,char *expr,char *output[]){
 	xmlInitParser();
+	 xmlDocPtr doc = htmlReadFile(file, NULL, HTML_PARSE_NOBLANKS | HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING | HTML_PARSE_NONET);
+	return XPathQuery(doc,expr,output);
+}
+
+int XPathQuery(xmlDocPtr doc ,char *expr,char *output[]){
 	int i;
 	int size = 0;
-	 xmlDocPtr doc = htmlReadFile(file, NULL, HTML_PARSE_NOBLANKS | HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING | HTML_PARSE_NONET);
 	xmlChar *xpath = (xmlChar*) expr;
 	xmlNodeSetPtr nodeset;
 	xmlXPathObjectPtr result;
@@ -153,6 +72,7 @@ int extern ezXPathHTMLFile(char *file,char *expr,char *output[]){
 	xmlCleanupParser();
 	return size;
 }
+
 xmlNodeSetPtr getnodeset(xmlDocPtr doc,xmlChar *xpath){
 	xmlXPathObjectPtr result;
 	xmlXPathContextPtr context;
