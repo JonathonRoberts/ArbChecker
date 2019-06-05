@@ -98,8 +98,10 @@ sub crawlsite{
 	my $url = "https://www.oddschecker.com/sitemap.xml";
 	my $html = qx{curl --insecure --silent $url};
 	my @pages;
-	while($html =~ s#(https://www\.oddschecker\.com/[^\<]+)/sitemap\.xml##){
-		push(@pages,$1)
+	while($html =~ s#(https://www\.oddschecker\.com/sport/[^\<]+)/sitemap\.xml##){
+my $tmp = $1;
+	$tmp =~ s#sport/##;
+		push(@pages,$tmp)
 	}
 	return @pages;
 }
@@ -113,7 +115,7 @@ sub list{
 	#returns list of catagories found in the sitemap
 	my @oldlist;
 	foreach(&crawlsite){
-		$_ =~ s#^.+\.com/([^\/]+).*#$1#;
+		$_ =~ s#^.+\.com/sport/([^\/]+).*#$1#;
 		push(@oldlist,$_);
 	}
 	my @newlist = &uniq(@oldlist);
